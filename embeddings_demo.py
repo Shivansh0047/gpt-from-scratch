@@ -29,3 +29,24 @@ ids = torch.tensor(tok.encode(sample))
 vectors = token_emb(ids)                   
 print(f"\nEmbeddings for '{sample}':\n{vectors}")
 print("Shape:", vectors.shape)
+
+# Positional Embeddings - add order information, give each position a learnable position
+
+block_size = 16 # the max sequence length our model will ever look at, which will also be number of rows in pos_emb
+
+pos_emb = nn.Embedding(block_size, d_model) # d_model dim block_size vectors
+
+sample = "Hi"
+ids = torch.tensor(tok.encode(sample))
+positions = torch.arange(len(sample))   
+print("Position ids:", positions)
+
+tok_vectors = token_emb(ids)          # tells "what character is this"
+pos_vectors = pos_emb(positions)      # tells "where in the sequence is this"
+
+x = tok_vectors + pos_vectors         # "which character" and "which position," blended into one vector of the same size. 
+# Position and content are independent, learned separately, then fused by addition.
+
+print("\nToken embeddings:\n", tok_vectors)
+print("\nPosition embeddings:\n", pos_vectors)
+print("\nCombined input (x = token_emb + pos_emb):\n", x)
