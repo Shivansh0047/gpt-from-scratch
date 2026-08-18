@@ -2,6 +2,8 @@
 # Python
 # ================================
 
+# Temp file used for testing
+test.py 
 __pycache__/
 *.py[cod]
 *$py.class
@@ -209,6 +211,7 @@ hf_cache/
 
 data/*
 !data/shakespeare.txt
+!data/tinystories.txt
 datasets/
 dataset/
 
