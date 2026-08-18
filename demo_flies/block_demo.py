@@ -3,7 +3,11 @@ import torch.nn as nn
 import math
 from tokenizer_char import CharTokenizer
 
-with open("data/shakespeare.txt", "r") as f:
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "shakespeare.txt")
+with open(data_path, "r") as f:
     text = f.read()
 tok = CharTokenizer(text)
 
