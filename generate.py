@@ -1,5 +1,6 @@
 import torch
 from model import GPT
+from model_kv import GPTKV
 from tokenizer_bpe import BPETokenizer
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -12,8 +13,12 @@ cfg = ckpt["config"]
 
 tok = BPETokenizer()
 
-model = GPT(**cfg).to(device)             # rebuild the model with the SAME architecture
-model.load_state_dict(ckpt["model_state"])  # load the trained weights into it
+# model = GPT(**cfg).to(device)             # rebuild the model with the SAME architecture
+# model.load_state_dict(ckpt["model_state"])  # load the trained weights into it
+# model.eval()       # Put the model in eval mode # turn off dropout for generation
+
+model = GPTKV(**cfg).to(device)             # rebuild the model with the SAME architecture, KV-cached version
+model.load_state_dict(ckpt["model_state"])  # load the trained weights into it -- same state_dict keys work for both
 model.eval()       # Put the model in eval mode # turn off dropout for generation
 '''
 def encode(s):
@@ -44,5 +49,10 @@ def generate(model, idx, max_new_tokens, temperature=0.8, top_k=40):
 # prompt = "ROMEO:"
 prompt = "Once upon a time"
 context = torch.tensor([tok.encode(prompt)], dtype=torch.long, device=device)  # shape (1, len(prompt))
-out = generate(model, context, max_new_tokens=500)
+
+# out = generate(model, context, max_new_tokens=500)   # old, non-cached generation loop (needs GPT, not GPTKV)
+
+assert context.shape[1] + 100 <= model.block_size, "prompt + max_new_tokens must fit inside block_size"
+out = model.generate(context, max_new_tokens=100)   # new: KV-cached generation, built into GPTKV itself
+
 print(tok.decode(out[0].tolist()))
